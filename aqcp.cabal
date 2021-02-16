@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7f00a52ad9e44dd61bac42864baa20a29391828ad155ee8ae8f83a5da76d8040
+-- hash: 01f71b173ec7d4d096bcd37f91d2c9c0dc5589cb18928039b8e74083fbb4ac16
 
 name:           aqcp
 version:        0.1.0.0
@@ -34,6 +34,7 @@ library
       src
   build-depends:
       base >=4.7 && <5
+    , network
   default-language: Haskell2010
 
 executable aqcp-exe
@@ -46,6 +47,7 @@ executable aqcp-exe
   build-depends:
       aqcp
     , base >=4.7 && <5
+    , network
   default-language: Haskell2010
 
 test-suite aqcp-test
@@ -59,4 +61,5 @@ test-suite aqcp-test
   build-depends:
       aqcp
     , base >=4.7 && <5
+    , network
   default-language: Haskell2010
