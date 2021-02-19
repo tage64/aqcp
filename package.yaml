@@ -26,6 +26,7 @@ dependencies:
 - bytestring
 - vector
 - iproute
+- network-simple
 
 library:
   source-dirs: src
