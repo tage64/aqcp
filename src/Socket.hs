@@ -1,5 +1,6 @@
 module Socket
   ( Socket
+  , convertIP
   , withSocket
   , sendBytes
   , receiveBytes
