@@ -25,6 +25,7 @@ dependencies:
 - portaudio
 - bytestring
 - vector
+- iproute
 
 library:
   source-dirs: src

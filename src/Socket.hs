@@ -7,12 +7,13 @@ module Socket
   )
 where
 
+import           Data.IP
 import           Data.ByteString
 import qualified Network.Socket.ByteString     as BS
 import           Network.Socket
 
 convertIP :: String -> HostAddress
-convertIP publicIP = undefined
+convertIP publicIP = toHostAddress $ (read publicIP :: IPv4)
 
 withSocket :: PortNumber -> HostAddress -> (Socket -> IO ()) -> IO ()
 withSocket portNumber hostAddress sockComputation = withSocketsDo $ do
