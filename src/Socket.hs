@@ -1,6 +1,6 @@
 module Socket
   ( Socket
-  , initSocket
+  , withSocket
   , sendBytes
   , receiveBytes
   , closeSocket
@@ -8,23 +8,21 @@ module Socket
 where
 
 import           Data.ByteString
-import qualified Network.Socket.ByteString as BS
+import qualified Network.Socket.ByteString     as BS
 import           Network.Socket
-
-sockType :: SocketType
-sockType = Stream
 
 convertIP :: String -> HostAddress
 convertIP publicIP = undefined
 
-initSocket :: SocketType -> IO ()
-initSocket sockType = withSocketsDo $ do
-  socket <- socket AF_INET sockType 0
+withSocket :: PortNumber -> HostAddress -> (Socket -> IO ()) -> IO ()
+withSocket portNumber hostAddress sockComputation = withSocketsDo $ do
+  socket <- socket AF_INET Stream 0
   setSocketOption socket ReuseAddr 1
-  bind socket (SockAddrInet 5050 convertIP (someIP))
+  bind socket (SockAddrInet portNumber hostAddress)
+  sockComputation socket
 
 sendBytes :: Socket -> ByteString -> IO ()
-sendBytes socket = BS.sendAll socket someByteString
+sendBytes socket someByteString = BS.sendAll socket someByteString
 
 receiveBytes :: Socket -> IO ByteString
 receiveBytes socket = BS.recv socket 2
