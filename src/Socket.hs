@@ -1,33 +1,27 @@
 module Socket
   ( Socket
-  , convertIP
-  , withSocket
+  , withClient
+  , withServer
   , sendBytes
   , receiveBytes
-  , closeSocket
   )
 where
 
 import           Data.IP
 import           Data.ByteString
 import qualified Network.Socket.ByteString     as BS
-import           Network.Socket
+import           Network.Simple.TCP
 
-convertIP :: String -> HostAddress
-convertIP publicIP = toHostAddress $ (read publicIP :: IPv4)
+withClient :: HostName -> ServiceName -> ((Socket, SockAddr) -> IO a) -> IO a
+withClient = connect
 
-withSocket :: PortNumber -> HostAddress -> (Socket -> IO ()) -> IO ()
-withSocket portNumber hostAddress sockComputation = withSocketsDo $ do
-  socket <- socket AF_INET Stream 0
-  setSocketOption socket ReuseAddr 1
-  bind socket (SockAddrInet portNumber hostAddress)
-  sockComputation socket
+withServer
+  :: HostPreference -> ServiceName -> ((Socket, SockAddr) -> IO a) -> IO a
+withServer hostPreference serviceName computation =
+  listen hostPreference serviceName (\(socket, _) -> accept socket computation)
 
 sendBytes :: Socket -> ByteString -> IO ()
-sendBytes socket someByteString = BS.sendAll socket someByteString
+sendBytes socket someByteString = send socket someByteString
 
-receiveBytes :: Socket -> IO ByteString
-receiveBytes socket = BS.recv socket 2
-
-closeSocket :: Socket -> IO ()
-closeSocket = close
+receiveBytes :: Socket -> IO (Maybe ByteString)
+receiveBytes socket = recv socket 4096
