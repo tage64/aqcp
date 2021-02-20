@@ -15,10 +15,10 @@ Advanced Quantified Communication Program
 ### Linux (Ubuntu/Debian)
 * Install [stack](https://docs.haskellstack.org/en/stable/README/)
 * In order to get the correct necessary debian header files run:
-```
-$ sudo apt-get install portaudio19-dev
-$ stack build
-```
+    ```
+    $ sudo apt-get install portaudio19-dev
+    $ stack build
+    ```
 ### Windows
 
 * Install [stack](https://docs.haskellstack.org/en/stable/README/)
@@ -40,6 +40,7 @@ $ stack build
 * Install [stack](https://docs.haskellstack.org/en/stable/README/)
 * Install the portaudio package with [homebrew](https://brew.sh/)
 * And run:
-```
-$ stack build
-```
+    ```
+    $ stack build
+    ```
+
