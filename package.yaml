@@ -27,6 +27,7 @@ dependencies:
 - vector
 - iproute
 - network-simple
+- lz4
 
 library:
   source-dirs: src
