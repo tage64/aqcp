@@ -28,6 +28,7 @@ dependencies:
 - iproute
 - network-simple
 - lz4
+- spool
 
 library:
   source-dirs: src
