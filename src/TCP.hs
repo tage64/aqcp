@@ -1,4 +1,4 @@
-module Socket
+module TCP
   ( Socket
   , withClient
   , withServer
@@ -9,7 +9,6 @@ where
 
 import           Data.IP
 import           Data.ByteString
-import qualified Network.Socket.ByteString     as BS
 import           Network.Simple.TCP
 
 withClient :: HostName -> ServiceName -> ((Socket, SockAddr) -> IO a) -> IO a
