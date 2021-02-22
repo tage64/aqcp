@@ -29,6 +29,7 @@ dependencies:
 - network-simple
 - lz4
 - spool
+- saltine
 
 library:
   source-dirs: src
@@ -45,12 +46,14 @@ executables:
     - aqcp
 
 tests:
-  aqcp-test:
-    main:                Spec.hs
-    source-dirs:         test
+  tcp-test:
+    main:                TCPTest.hs
+    source-dirs:         test/tcp
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
     - aqcp
+    - HUnit
+    - async
