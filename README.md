@@ -7,18 +7,17 @@ Advanced Quantified Communication Program
 
 * Install [stack](https://docs.haskellstack.org/en/stable/README/)
 * Install the portaudio package with your favorite package manager to get the necessary header files.
+    * On arch linux it's the portaudio package.
+    * On Ubuntu/Debian it's portaudio-19-dev.
+* Install libsodium or libsodium-dev depending on your distro.
+    * Arch: libsodium
+    * Ubuntu/Debian: libsodium-dev
 * Just run:
 
     ```
     $ stack build
     ```
-### Linux (Ubuntu/Debian)
-* Install [stack](https://docs.haskellstack.org/en/stable/README/)
-* In order to get the correct necessary debian header files run:
-    ```
-    $ sudo apt-get install portaudio19-dev
-    $ stack build
-    ```
+
 ### Windows
 
 * Install [stack](https://docs.haskellstack.org/en/stable/README/)
@@ -31,6 +30,7 @@ Advanced Quantified Communication Program
     $ stack exec -- pacman -S mingw-w64-x86_64-toolchain  # Choose to install all packages if you're unsure.
     $ stack exec -- pacman -S mingw-w64-x86_64-cmake
     $ stack exec -- pacman -S mingw-w64-x86_64-portaudio
+    $ stack exec -- pacman -S mingw-w64-x86_64-libsodium
     # And now we should just be able to run:
     $ stack build
     ```
@@ -39,6 +39,7 @@ Advanced Quantified Communication Program
 
 * Install [stack](https://docs.haskellstack.org/en/stable/README/)
 * Install the portaudio package with [homebrew](https://brew.sh/)
+* libsodium also must be installed and found by the ghc compiler. We've not managed to solve that yet. Open for solutions.
 * And run:
     ```
     $ stack build
