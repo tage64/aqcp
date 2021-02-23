@@ -12,6 +12,14 @@ localHost = "127.0.0.1"
 serverMessage = "Hi, server here."
 clientMessage = "Hi, client here."
 
+{- server address port message
+   Initializes a TCP server end point where address is the domain name or hostname IP address,
+   port is the port name or port number. In order to connect two systems on different networks,
+   servicename must be a forwarded port which can be configured through the router in WAN services.
+   SIDE EFFECTS: address must be a valid address and port a valid port or it will raise an exception.
+   EXAMPLES: server system: server "192.168.1.118" "5050" "Hello, Client!" == Just "Hello, Server!"
+             client system: client "192.169.1.118" "5050" "Hello, Server!" == Just "Hello, Client!"
+-}
 server :: String -> String -> String -> IO (Maybe Char8.ByteString)
 server address port message = withServer
   (Host address)
@@ -21,6 +29,14 @@ server address port message = withServer
     receiveBytes socket
   )
 
+{- client address port message
+   Initializes a TCP client end point where address is the server domain name or hostname IP address,
+   port is the port name or port number. In order to connect two systems on different networks,
+   servicename must be a forwarded port which can be configured through the router in WAN services.
+   SIDE EFFECTS: address must be a valid address and port a valid port or it will raise an exception.
+   EXAMPLES: server system: server "192.168.1.118" "5050" "Hello, Client!" == Just "Hello, Server!"
+             client system: client "192.169.1.118" "5050" "Hello, Server!" == Just "Hello, Client!"
+-}
 client :: String -> String -> String -> IO (Maybe Char8.ByteString)
 client address port message = withClient
   address

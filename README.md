@@ -35,7 +35,7 @@ Advanced Quantified Communication Program
     $ stack build
     ```
 
-### Mac OS X
+### Mac OS X (No longer supported)
 
 * Install [stack](https://docs.haskellstack.org/en/stable/README/)
 * Install the portaudio package with [homebrew](https://brew.sh/)
@@ -44,4 +44,3 @@ Advanced Quantified Communication Program
     ```
     $ stack build
     ```
-
