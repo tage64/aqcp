@@ -30,6 +30,7 @@ dependencies:
 - lz4
 - spool
 - saltine
+- binary
 
 library:
   source-dirs: src
@@ -57,3 +58,13 @@ tests:
     - aqcp
     - HUnit
     - async
+  crypto-test:
+    main:                CryptoTest.hs
+    source-dirs:         test/crypto
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - aqcp
+    - HUnit
