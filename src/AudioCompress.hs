@@ -6,11 +6,6 @@ import           Data.Maybe
 import           Data.Vector.Storable.ByteString as V
 import           Samples
 import qualified Codec.Compression.LZ4 as LZ
-import           Data.Vector.Storable -- Ta bort
-import           Data.Int -- ta bort
-
-x = Data.Vector.Storable.replicate 2 (10::Int16) -- Ta bort
-y = Data.ByteString.replicate 2 1
 
 {- compress rawAudio
    Compress a vector storing raw audio data.
