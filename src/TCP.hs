@@ -7,8 +7,8 @@ module TCP
   )
 where
 
-import           Data.IP
 import           Data.ByteString
+import           Data.IP
 import           Network.Simple.TCP
 
 {- Since these function requires two systems in order to work it's hard to visually
@@ -17,7 +17,7 @@ import           Network.Simple.TCP
 
 {- withClient hostname servicename
    Initializes a client end of a TCP connection, where hostname is the server domain name
-   or IP address and servicename is the server port name or port number. In order to connect 
+   or IP address and servicename is the server port name or port number. In order to connect
    two systems on different networks, servicename must be a forwarded port which can be configured
    through the router in WAN services.
    SIDE EFFECTS: hostname must be a valid address and servicename a valid port or it will
@@ -28,16 +28,16 @@ withClient = connect
 
 {- withServer hostpreference servicename
    Initializes a server end of a TCP connection, where hostpreference is the host to bind and
-   servicename is the port name or the port number to bind. In order to connect 
+   servicename is the port name or the port number to bind. In order to connect
    two systems on different networks, servicename must be a forwarded port which can be configured
    through the router in WAN services.
    SIDE EFFECTS: hostname must be a valid address and servicename a valid port or it will
                  raise an exception.
 -}
 withServer
-  :: HostPreference -> ServiceName -> ((Socket, SockAddr) -> IO a) -> IO a
+  :: String -> ServiceName -> ((Socket, SockAddr) -> IO a) -> IO a
 withServer hostPreference serviceName computation =
-  listen hostPreference serviceName (\(socket, _) -> accept socket computation)
+  listen (Host hostPreference) serviceName (\(socket, _) -> accept socket computation)
 
 {-sendBytes socket bytestring
   Send bytestring over a TCP connection where socket must be bounded to a server or client.

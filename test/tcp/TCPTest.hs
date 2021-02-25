@@ -1,6 +1,6 @@
 import           Control.Concurrent
 import           Control.Concurrent.Async
-import qualified Data.ByteString.Char8         as Char8
+import qualified Data.ByteString.Char8    as Char8
 import           Network.Simple.TCP
 import           TCP
 import           Test.HUnit
@@ -22,7 +22,7 @@ clientMessage = "Hi, client here."
 -}
 server :: String -> String -> String -> IO (Maybe Char8.ByteString)
 server address port message = withServer
-  (Host address)
+  address
   port
   (\(socket, socketAddress) -> do
     sendBytes socket $ Char8.pack message
