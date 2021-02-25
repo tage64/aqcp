@@ -1,6 +1,7 @@
 -- Module comment TODO
 module Options (Options, getOptions) where
 
+import           System.Console.GetOpt
 import           Crypto (Code)
 
 
@@ -23,7 +24,15 @@ import           Crypto (Code)
 data Options = Server String String Code
              | Client String String Code
              | CentralServer String String
+             | Help String -- FOR TESTING
              deriving (Show)
+
+
+{- options
+   TODO
+-}
+options :: [OptDescr Options]
+options = [ Option ['h'] ["help"] (NoArg (Help "Help")) "show commands"] -- JUST AN EXAMPLE.
 
 {- getOptions
  - TODO
