@@ -1,4 +1,8 @@
--- Functions to compress and decompress raw audio. The compressed audio is stored in a ByteString.
+{- Converts vectors of raw audio data to compressed bytestrings.
+   The compression algorithm used is LZ4. A fast lossless suitable for networking.
+
+   https://github.com/mwotton/lz4hs
+-}
 module AudioCompress (compress, decompress) where
 
 import           Data.ByteString
