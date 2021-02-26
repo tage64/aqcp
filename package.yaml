@@ -31,6 +31,7 @@ dependencies:
 - spool
 - saltine
 - binary
+- async
 
 library:
   source-dirs: src
@@ -57,7 +58,6 @@ tests:
     dependencies:
     - aqcp
     - HUnit
-    - async
   crypto-test:
     main:                CryptoTest.hs
     source-dirs:         test/crypto

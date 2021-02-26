@@ -1,7 +1,7 @@
-import           Control.Concurrent
-import           Control.Concurrent.Async
-import qualified Data.ByteString.Char8    as Char8
-import           Network.Simple.TCP
+import           Control.Concurrent             ( threadDelay )
+import           Control.Concurrent.Async       ( concurrently )
+import           Control.Concurrent.MVar
+import qualified Data.ByteString.Char8         as Char8
 import           TCP
 import           Test.HUnit
 
@@ -20,14 +20,20 @@ clientMessage = "Hi, client here."
    EXAMPLES: server system: server "192.168.1.118" "5050" "Hello, Client!" == Just "Hello, Server!"
              client system: client "192.169.1.118" "5050" "Hello, Server!" == Just "Hello, Client!"
 -}
-server :: String -> String -> String -> IO (Maybe Char8.ByteString)
-server address port message = withServer
-  address
-  port
-  (\(socket, socketAddress) -> do
-    sendBytes socket $ Char8.pack message
-    receiveBytes socket
-  )
+server :: String -> String -> String -> IO (MVar (Maybe Char8.ByteString))
+server address port message = do
+  result <- newEmptyMVar
+  let terminate = readMVar result >> return ()
+  withServer
+    address
+    port
+    terminate
+    (\(socket, socketAddress) -> do
+      sendBytes socket $ Char8.pack message
+      received <- receiveBytes socket
+      putMVar result received
+    )
+  return result
 
 {- client address port message
    Initializes a TCP client end point where address is the server domain name or hostname IP address,
@@ -48,10 +54,11 @@ client address port message = withClient
 
 main :: IO ()
 main = do
-  (serverReceived, clientReceived) <-
+  (serverResult, clientReceived) <-
     concurrently (server "0.0.0.0" port serverMessage)
     $  (threadDelay 250000)  -- To make sure server is loaded before client.
     *> (client localHost port clientMessage)
+  serverReceived <- takeMVar serverResult
   putStrLn $ "Client received: " ++ show clientReceived
   putStrLn $ "Server received: " ++ show serverReceived
   assertEqual "Bad server message" clientReceived $ Just $ Char8.pack

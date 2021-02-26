@@ -1,5 +1,6 @@
 module TCP
   ( Socket
+  , SockAddr
   , withClient
   , withServer
   , sendBytes
@@ -7,8 +8,13 @@ module TCP
   )
 where
 
+import           Control.Concurrent.Async
+import           Control.Exception
+import           Control.Monad
 import           Data.ByteString
+import           Data.IORef
 import           Data.IP
+import           Debug.Trace
 import           Network.Simple.TCP
 
 {- Since these function requires two systems in order to work it's hard to visually
@@ -26,18 +32,61 @@ import           Network.Simple.TCP
 withClient :: HostName -> ServiceName -> ((Socket, SockAddr) -> IO a) -> IO a
 withClient = connect
 
-{- withServer hostpreference servicename
-   Initializes a server end of a TCP connection, where hostpreference is the host to bind and
+{- withServer hostPreference servicename terminate computation
+   Initializes a server end of a TCP connection, where hostPreference is the host to bind and
    servicename is the port name or the port number to bind. In order to connect
    two systems on different networks, servicename must be a forwarded port which can be configured
    through the router in WAN services.
-   SIDE EFFECTS: hostname must be a valid address and servicename a valid port or it will
-                 raise an exception.
+
+   terminate is an IO action which when done signals to the server to terminate.
+   So if terminate is set to threadDelay 5000000 (us), the server will run for 5 seconds.
+   When terminate completes, all connection computations will be canceled with Async.cancel.
+
+   computation is a function that will be run every time a new client connects to the server in a separate thread.
+   Any exception thrown by the computation will be cought and printed to stdout or stderr.
+
+   RETURNS: IO ()
+   SIDE EFFECTS: - hostname must be a valid address and servicename a valid port or it will
+                   raise an exception.
+                 - All exceptions thrown from computation for any connection will be printed to stdout or stderr.
+                 - The returned IO () will complete first after the server is terminated.
 -}
 withServer
-  :: String -> ServiceName -> ((Socket, SockAddr) -> IO a) -> IO a
-withServer hostPreference serviceName computation =
-  listen (Host hostPreference) serviceName (\(socket, _) -> accept socket computation)
+  :: String -> ServiceName -> IO () -> ((Socket, SockAddr) -> IO ()) -> IO ()
+withServer hostPreference serviceName terminate computation = listen
+  (Host hostPreference)
+  serviceName
+  (\(socket, _) -> do
+    -- A mutable variable which holds a list of all connection threads.
+    connectionThreads <- newIORef []
+    -- Listen forever for incoming connections in a separate thread.
+    listenThread      <- async $ forever $ accept
+      socket
+      (\conn@(_, sockAddr) -> do
+        -- Spawn the computation in a separate.
+        thread <-
+          async
+          $       computation conn
+          `catch` (\e ->
+                    traceIO
+                      $  "Error at connection "
+                      ++ show sockAddr
+                      ++ ": "
+                      ++ show (e :: SomeException)
+                  )
+        -- Add the thread to the list of connection threads.
+        atomicModifyIORef' connectionThreads
+                           (\threads -> (thread : threads, ()))
+      )
+    -- Convert terminate to a async object.
+    terminateThread <- async terminate
+    -- Wait until terminate completes or listenThread races an exception.
+    waitEither terminateThread listenThread
+    cancel listenThread
+    -- Cancel all connection threads.
+    threads <- readIORef connectionThreads
+    forM_ threads cancel
+  )
 
 {-sendBytes socket bytestring
   Send bytestring over a TCP connection where socket must be bounded to a server or client.
