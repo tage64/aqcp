@@ -1,7 +1,10 @@
 -- Module comment TODO
 module Options (Options, getOptions) where
 
-import           System.Console.GetOpt
+import           System.Console.ArgParser
+import           System.Environment (getArgs)
+import           System.Exit
+import           Control.Applicative
 import           Crypto (Code)
 
 
@@ -27,15 +30,36 @@ data Options = Server String String Code
              | Help String -- FOR TESTING
              deriving (Show)
 
-
-{- options
-   TODO
+{- makeParser
+   TODO: Help subcommand
+         (Program epilogue)
 -}
-options :: [OptDescr Options]
-options = [ Option ['h'] ["help"] (NoArg (Help "Help")) "show commands"] -- JUST AN EXAMPLE.
+makeParser :: IO (CmdLnInterface Options)
+makeParser = do
+   subcommands <- mkSubParser
+      [ ("server", mkDefaultApp ((\s1 s2 s3 -> Server s1 s2 $ read $ s3) 
+      `parsedBy` reqPos "address" `Descr` "local IP address" 
+      `andBy` reqPos "port" `Descr` "server port or service name" 
+      `andBy` reqPos "code" `Descr` "code to verify with client") "server")
+      , ("client", mkDefaultApp ((\s1 s2 s3 -> Client s1 s2 $ read $ s3) 
+      `parsedBy` reqPos "address" `Descr` "public IP address of the server " 
+      `andBy` reqPos "port" `Descr` "server port or service name" 
+      `andBy` reqPos "code" `Descr` "code to verify with server") "client") 
+      , ("centralserver", mkDefaultApp 
+      (CentralServer 
+      `parsedBy` reqPos "address" 
+      `andBy` reqPos "port") "centralserver")]
+   return $ setAppDescr subcommands "Advanced Quantified Communication Program"
 
 {- getOptions
- - TODO
+ - add doc
  -}
 getOptions :: IO Options
-getOptions = undefined
+getOptions = do
+   args <- getArgs
+   parser <- makeParser
+   case parseArgs args parser of 
+      Left error -> (do
+         putStrLn error
+         exitSuccess)
+      Right options -> return options
