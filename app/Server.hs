@@ -1,11 +1,12 @@
+-- Code for running a server as part of a call.
+-- This is not intended as a central server but rather as one end of a conversation.
+-- If no of the participants in a call want to act as server, they can connect as clients to a central server instead.
+-- For that, please see CentralServer.hs.
 module Server
   ( runServer
   )
 where
 
-import           Control.Concurrent.Async
-import           Control.Exception
-import           Control.Monad
 import           Crypto
 import           StreamAudio
 import           TCP
