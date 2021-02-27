@@ -31,11 +31,8 @@ dependencies:
 - spool
 - saltine
 - binary
-<<<<<<< HEAD
 - async
-=======
 - argparser
->>>>>>> Add argparser to package.yaml
 
 library:
   source-dirs: src
