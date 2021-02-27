@@ -59,33 +59,44 @@ withServer hostPreference serviceName terminate computation = listen
   (\(socket, _) -> do
     -- A mutable variable which holds a list of all connection threads.
     connectionThreads <- newIORef []
-    -- Listen forever for incoming connections in a separate thread.
-    listenThread      <- async $ forever $ accept
-      socket
-      (\conn@(_, sockAddr) -> do
-        -- Spawn the computation in a separate.
-        thread <-
-          async
-          $       computation conn
-          `catch` (\e ->
-                    traceIO
-                      $  "Error at connection "
-                      ++ show sockAddr
-                      ++ ": "
-                      ++ show (e :: SomeException)
+    let -- A new thread where we listen for incoming connections.
+        createListenThread = async $ forever $ accept
+          socket
+          (\conn@(_, sockAddr) -> do
+            let -- A new thread for this connection.
+                -- Here we'll run the provided computation and catch and print any exception.
+                createThread = async
+                  (       computation conn
+                  `catch` (\e ->
+                            traceIO
+                              $  "Error at connection "
+                              ++ show sockAddr
+                              ++ ": "
+                              ++ show (e :: SomeException)
+                          )
                   )
-        -- Add the thread to the list of connection threads.
-        atomicModifyIORef' connectionThreads
-                           (\threads -> (thread : threads, ()))
-      )
-    -- Convert terminate to a async object.
-    terminateThread <- async terminate
-    -- Wait until terminate completes or listenThread races an exception.
-    waitEither terminateThread listenThread
-    cancel listenThread
-    -- Cancel all connection threads.
-    threads <- readIORef connectionThreads
-    forM_ threads cancel
+                -- Update the list of connection threads.
+                updateThreadList newThread = atomicModifyIORef'
+                  connectionThreads
+                  (\threads -> (newThread : threads, ()))
+            -- We'll use a bracket to make sure the created thread is canceled if an exception is thrown somewhere.
+            bracketOnError createThread cancel updateThreadList
+          )
+        -- Wait for the provided terminate computation to complete or the listen thread to throw an exception.
+        waitForTerminate listenThread = do
+          -- Convert terminate to an async object.
+          terminateThread <- async terminate
+          -- Wait until terminate completes or listenThread races an exception.
+          waitEither terminateThread listenThread
+        -- Cancel listen thread and all connection threads.
+        cancelThreads listenThread = do
+          cancel listenThread
+          -- Cancel all connection threads.
+          threads <- readIORef connectionThreads
+          forM_ threads cancel
+    -- Here we use a bracket to make sure all threads are canceled even if an exception is thrown at some point.
+    bracket createListenThread cancelThreads waitForTerminate
+    return ()
   )
 
 {-sendBytes socket bytestring

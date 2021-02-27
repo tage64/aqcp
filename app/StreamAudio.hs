@@ -8,6 +8,7 @@ where
 import           AudioCompress
 import           AudioIO
 import           Control.Concurrent.Async
+import           Control.Exception              ( bracketOnError )
 import           Control.Monad
 import           Crypto
 import           TCP
@@ -24,14 +25,22 @@ streamAudio :: IO () -> Socket -> Encrypter -> Decrypter -> IO ()
 streamAudio terminate socket encrypter decrypter = do
   result <- withAudioIO
     (\(inputStream, outputStream) -> do
-      readerThread <- async $ reader socket encrypter inputStream
-      writerThread <- async $ writer socket decrypter outputStream
-      -- Wait for terminate to complete or for reader or writer to throw an exception.
-      -- race takes two IO computations and waits for the first,
-      -- similarly waitEither takes two Async's and returns an IO.
-      -- Combining them leads to the following:
-      race terminate $ waitEither readerThread writerThread
-      return ()
+      let -- Wait until terminate, readerThread or writerThread completes.
+          -- Since reader and writer should run forever, it'll in practise wait until terminates completes or reader or writer throws an exception.
+          waitForTerminate readerThread writerThread = do
+            race terminate $ waitEither readerThread writerThread
+            return ()
+          readerThread = async $ reader socket encrypter inputStream
+          writerThread = async $ writer socket decrypter outputStream
+      -- We'll use bracketOnError from Control.Exception to make sure reader and writer are canceled in case of an exception.
+      bracketOnError
+        readerThread
+        cancel
+        (\readerThread -> bracketOnError
+          writerThread
+          cancel
+          (\writerThread -> waitForTerminate readerThread writerThread)
+        )
     )
   case result of
     Left err ->
