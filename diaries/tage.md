@@ -9,9 +9,13 @@
 * Wed Feb 24: Finnished the AudioIO module in src/AudioIO.hs.
             It uses portaudio via bindings from haskell's portaudio package.
             It involved quite a bit of IO monads and some coding with vectors and raw pointers when interfacing to portaudio's functions.
-- Thu Feb 25: Started to implement the code in app/ which is more of a main-code and not lib-code.
+* Thu Feb 25: Started to implement the code in app/ which is more of a main-code and not lib-code.
               Began to implement an interface for command line parsing but handed over the implementation to an other group member.
               Then started to implement the server and needed to change withServer in TCP.hs a litle bit.
               Read about how to terminate threads and thus also the server and came up with a solution based on the async package.
-- Fri Feb 26: Finished the implementation of the server.
+* Fri Feb 26: Finished the implementation of the server.
               Split out a module about audio streaming so that it can be used by both server and client.
+* Sat Feb 27: Implemented the client in app/Client.hs.
+              It was quite similar to implementing the server in app/Server.hs.
+              However, also made exception handling safer by introducing brackets from Control.Exception in src/TCP.hs and app/Server.hs.
+              The code looks a bit more uggly with those bracket-functions, but it is needed to make sure all threads are canceled properly.
