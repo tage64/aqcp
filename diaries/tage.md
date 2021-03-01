@@ -19,3 +19,5 @@
               It was quite similar to implementing the server in app/Server.hs.
               However, also made exception handling safer by introducing brackets from Control.Exception in src/TCP.hs and app/Server.hs.
               The code looks a bit more uggly with those bracket-functions, but it is needed to make sure all threads are canceled properly.
+* Mon Mar 1: Added possibility to select input and output audio device by implementing wrappers around functions and types from portaudio in AudioIO.hs.
+             Also learnt a bit about monad transformers and introduced the ExceptT transformer in a few functions. It was funny and the code looks even cleaner.
