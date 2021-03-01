@@ -7,3 +7,5 @@
 * Thu Feb 25: Researched on System.Console.GetOpt library and coded Options.hs prototype 1
 * Fri Feb 25: After coding a prototype with System.Console.GetOpt I decided to switch to another
 library namely System.Console.ArgParser which seemed to have more of what we needed for this project. Finished coding Options.hs
+* Sun Feb 28: Added docs to Options.hs and testet whole application with Tage. We ran into some issues regarding portaudio not finding
+soundcard device on the server laptop. The plan now is to build an executable on windows instead.
