@@ -7,11 +7,12 @@ module Server
   )
 where
 
+import           AudioIO
 import           Crypto
 import           StreamAudio
 import           TCP
 
-{- runServer terminate ipAddr serviceName code
+{- runServer terminate ipAddr serviceName code inputAudioDevice outputAudioDevice
  - Run the program as a server talking to a client.
  - Arguments:
  -    terminate: An IO computation which when completed terminates the server.
@@ -23,11 +24,10 @@ import           TCP
  - RETURNS: () in an IO computation.
  - SIDE_EFFECTS: TODO
  -}
-runServer :: IO () -> String -> String -> Code -> IO ()
-runServer terminate ipAddr sirviceName code = TCP.withServer ipAddr
-                                                             sirviceName
-                                                             terminate
-                                                             connection
+runServer
+  :: IO () -> String -> String -> Code -> DeviceInfo -> DeviceInfo -> IO ()
+runServer terminate ipAddr sirviceName code inputDevice outputDevice =
+  TCP.withServer ipAddr sirviceName terminate connection
  where
   {- connection (socket, _)
    - Handshake with the client on a socket and start send and receive audio.
@@ -63,4 +63,4 @@ runServer terminate ipAddr sirviceName code = TCP.withServer ipAddr
 
     -- Start the audio streaming.
     -- It'll terminate when terminate completes, (as runServer will do).
-    streamAudio terminate socket encrypter decrypter
+    streamAudio terminate socket encrypter decrypter inputDevice outputDevice

@@ -13,7 +13,7 @@ import           Control.Monad
 import           Crypto
 import           TCP
 
-{- streamAudio terminate socket encrypter decrypter
+{- streamAudio terminate socket encrypter decrypter inputAudioDevice outputAudioDevice
  - Initialize AudioIO, read/write audio simultainiously followed by compression/decompression, encryption/decryption and sending/receiving over a socket.
  - Basically, handle all audio streaming.
  - terminate is an IO computation witch will terminate the audio streaming when completed.
@@ -21,9 +21,18 @@ import           TCP
  - RETURNS: IO ()
  - SIDE_EFFECTS: Will throw an exception if an unrecoverable error occurres at any point in the initialization or streaming.
  -}
-streamAudio :: IO () -> Socket -> Encrypter -> Decrypter -> IO ()
-streamAudio terminate socket encrypter decrypter = do
+streamAudio
+  :: IO ()
+  -> Socket
+  -> Encrypter
+  -> Decrypter
+  -> DeviceInfo
+  -> DeviceInfo
+  -> IO ()
+streamAudio terminate socket encrypter decrypter inputDevice outputDevice = do
   result <- withAudioIO
+    inputDevice
+    outputDevice
     (\(inputStream, outputStream) -> do
       let -- Wait until terminate, readerThread or writerThread completes.
           -- Since reader and writer should run forever, it'll in practise wait until terminates completes or reader or writer throws an exception.

@@ -6,6 +6,10 @@ module AudioIO
   , Error
   , InputOverflowed
   , OutputUnderflowed
+  , DeviceInfo
+  , devices
+  , defaultInputDevice
+  , defaultOutputDevice
   , sampleRate
   , framesPerBuffer
   , withAudioIO
@@ -14,11 +18,16 @@ module AudioIO
   )
 where
 
+import           Control.Monad
+import           Control.Monad.IO.Class         ( liftIO )
+import           Control.Monad.Trans.Except
 import           Samples
 import qualified Sound.PortAudio               as PortAudio
+import qualified Sound.PortAudio.Base          as PortAudioBase
 import           Data.Vector.Storable           ( Vector )
 import qualified Data.Vector.Storable          as Vector
 import qualified Data.Vector.Storable.Mutable  as Vector.Mutable
+import           Foreign.C.Types                ( CDouble )
 
 -- An error that might occur when port audio initializes or terminates.
 type Error = PortAudio.Error
@@ -41,6 +50,76 @@ data InputOverflowed = InputOverflowed deriving (Show)
  -}
 data OutputUnderflowed = OutputUnderflowed deriving (Show)
 
+{- Information about an audio device.
+ - Represented by DeviceInfo name maxInputChannels maxOutputChannels defaultSampleRate portAudioIndex
+ - INVARIANT: The properties must be similar to that of the portaudio device with the same index.
+ -}
+data DeviceInfo = DeviceInfo {
+                    name :: String,
+                    maxInputChannels :: Int,
+                    maxOutputChannels :: Int,
+                    defaultSampleRate :: CDouble,
+                    portAudioIndex :: Int
+                  }
+
+{- mkDeviceInfo deviceIndex portAudioDeviceInfo
+ - Construct a DeviceInfo from an portaudio index and portaudio device info.
+ - PRE: deviceIndex and deviceInfo must relate to the same device.
+ - RETURNS: A DeviceInfo.
+ -}
+mkDeviceInfo
+  :: PortAudioBase.PaDeviceIndex -> PortAudioBase.PaDeviceInfo -> DeviceInfo
+mkDeviceInfo index info = DeviceInfo
+  (PortAudioBase.name_PaDeviceInfo info)
+  (fromIntegral $ PortAudioBase.maxInputChannels info)
+  (fromIntegral $ PortAudioBase.maxOutputChannels info)
+  (PortAudioBase.defaultSampleRate info)
+  (fromIntegral $ PortAudioBase.unPaDeviceIndex index)
+
+{- devices
+ - Retrieve information about all possible audio devices.
+ - RETURNS: Right [DeviceInfo] upon success else Left Error
+ - SIDE_EFFECTS: Initializes and terminates portaudio.
+ -}
+devices :: IO (Either Error [DeviceInfo])
+devices = PortAudio.withPortAudio $ runExceptT
+  (do
+    numDevices <- liftIO PortAudio.getNumDevices
+    forM
+      [0 .. numDevices - 1]
+      (\index ->
+        (do
+          let paIndex = fromIntegral index :: PortAudioBase.PaDeviceIndex
+          info <- ExceptT $ PortAudio.getDeviceInfo paIndex
+          return $ mkDeviceInfo paIndex info
+        )
+      )
+  )
+
+{- defaultInputDevice
+ - Get the default input device.
+ - RETURNS: Right DeviceInfo upon success or Left Error upon failure.
+ - SIDE_EFFECTS: Initializes and terminates portaudio.
+ -}
+defaultInputDevice :: IO (Either Error DeviceInfo)
+defaultInputDevice = PortAudio.withPortAudio $ runExceptT
+  (do
+    (index, info) <- ExceptT PortAudio.getDefaultInputInfo
+    return $ mkDeviceInfo index info
+  )
+
+{- defaultOutputDevice
+ - Get the default output device.
+ - RETURNS: Right DeviceInfo upon success or Left Error upon failure.
+ - SIDE_EFFECTS: Initializes and terminates portaudio.
+ -}
+defaultOutputDevice :: IO (Either Error DeviceInfo)
+defaultOutputDevice = PortAudio.withPortAudio $ runExceptT
+  (do
+    (index, info) <- ExceptT PortAudio.getDefaultOutputInfo
+    return $ mkDeviceInfo index info
+  )
+
 sampleRate = 22050  -- Hz
 
 channelCount = 1  -- Mono
@@ -48,33 +127,49 @@ channelCount = 1  -- Mono
 -- The number of frames (samples) that will be read per each call to readAudio.
 framesPerBuffer = 441  -- 20 ms at 22050 Hz
 
-{- withAudioIO computation
+suggestedLatency = 0.3  -- Seconds
+
+{- withAudioIO inputDevice outputDevice computation
  - First initialize the audio machinary and start audio streams, then call the computation with audio input and output streams and lastly shut the audio machinary down.
  - The input and output streams should be written and read from as frequent as needed to keep a steady audio stream. Otherwise the audio might hack or samples might be lost. However, the program will not crash.
  - RETURNS: An IO computation with right the result from the function past in, or Left error if the initialization or termination failes.
  - SIDE_EFFECTS: Initializes portaudio and starts a stream as well as stops the stream and terminates portaudio.
  -}
-withAudioIO :: ((InputStream, OutputStream) -> IO a) -> IO (Either Error a)
-withAudioIO computation = PortAudio.withPortAudio $ PortAudio.withDefaultStream
-  channelCount
-  channelCount
-  sampleRate
-  (Just framesPerBuffer)
-  Nothing
-  Nothing
-  (\stream -> do
-    maybeError <- PortAudio.startStream stream
-    case maybeError of
-      Just error -> return $ Left error
-      Nothing    -> do
-        let inputStream  = InputStream stream
-            outputStream = OutputStream stream
-        result     <- computation (inputStream, outputStream)
-        maybeError <- PortAudio.stopStream stream
-        case maybeError of
-          Just error -> return $ Left error
-          Nothing    -> return $ Right result
-  )
+withAudioIO
+  :: DeviceInfo
+  -> DeviceInfo
+  -> ((InputStream, OutputStream) -> IO a)
+  -> IO (Either Error a)
+withAudioIO (DeviceInfo _ _ _ _ inDeviceIndex) (DeviceInfo _ _ _ _ outDeviceIndex) computation
+  = PortAudio.withPortAudio $ PortAudio.withStream
+    (Just $ PortAudio.StreamParameters
+      (PortAudioBase.PaDeviceIndex $ fromIntegral inDeviceIndex)
+      channelCount
+      (PortAudioBase.PaTime suggestedLatency)
+    )
+    (Just $ PortAudio.StreamParameters
+      (PortAudioBase.PaDeviceIndex $ fromIntegral outDeviceIndex)
+      channelCount
+      (PortAudioBase.PaTime suggestedLatency)
+    )
+    sampleRate
+    (Just framesPerBuffer)
+    []
+    Nothing
+    Nothing
+    (\stream -> do
+      maybeError <- PortAudio.startStream stream
+      case maybeError of
+        Just error -> return $ Left error
+        Nothing    -> do
+          let inputStream  = InputStream stream
+              outputStream = OutputStream stream
+          result     <- computation (inputStream, outputStream)
+          maybeError <- PortAudio.stopStream stream
+          case maybeError of
+            Just error -> return $ Left error
+            Nothing    -> return $ Right result
+    )
 
 {- readAudio inputStream
  - Read a vector of samples from the input stream (microphone).

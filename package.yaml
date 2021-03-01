@@ -33,6 +33,7 @@ dependencies:
 - binary
 - async
 - argparser
+- transformers
 
 library:
   source-dirs: src

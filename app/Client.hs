@@ -6,11 +6,12 @@ module Client
   )
 where
 
+import           AudioIO
 import           Crypto
 import           StreamAudio
 import           TCP
 
-{- runClient terminate ipAddr serviceName code
+{- runClient terminate ipAddr serviceName code inputAudioDevice outputAudioDevice
  - Run a client.
  - The client will connect to a server at ipAddr and port equal to serviceName.
  - It'll then handshake with the server using the provided code.
@@ -27,10 +28,10 @@ import           TCP
  -                - Initialize portaudio, listen on the microphone and play to the speakers.
  -                - Throw an exception if something goes wrong or if the server disconnects.
  -}
-runClient :: IO () -> String -> String -> Code -> IO ()
-runClient terminate ipAddr serviceName code = TCP.withClient ipAddr
-                                                             serviceName
-                                                             connection
+runClient
+  :: IO () -> String -> String -> Code -> DeviceInfo -> DeviceInfo -> IO ()
+runClient terminate ipAddr serviceName code inputDevice outputDevice =
+  TCP.withClient ipAddr serviceName connection
  where
   {- connection (socket, _)
    - Handshake with a server on a socket and start send and receive audio.
@@ -67,4 +68,4 @@ runClient terminate ipAddr serviceName code = TCP.withClient ipAddr
 
     -- Start the audio streaming.
     -- It'll terminate when terminate completes, (as runClient will do).
-    streamAudio terminate socket encrypter decrypter
+    streamAudio terminate socket encrypter decrypter inputDevice outputDevice
