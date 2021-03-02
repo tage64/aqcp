@@ -21,3 +21,9 @@
               The code looks a bit more uggly with those bracket-functions, but it is needed to make sure all threads are canceled properly.
 * Mon Mar 1: Added possibility to select input and output audio device by implementing wrappers around functions and types from portaudio in AudioIO.hs.
              Also learnt a bit about monad transformers and introduced the ExceptT transformer in a few functions. It was funny and the code looks even cleaner.
+* Tue Mar 2: Improved functionality of the tcp sending and receiving mechanism.
+             It now encodes byte strings with the binary package before sending so that the length of the sent message is tagged in the sent byte string.
+             The receiving end then reads as many bytes as needed to get just the sent byte string and stops then.
+             Then all byte strings sent will arrive with exactly the same length and content.
+             It took roughly the whole day but at the end my computer crashed and all my saved work was lost.
+             I needed to rewrite  everything in the evening but it actually became better code then.
