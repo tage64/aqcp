@@ -8,4 +8,6 @@
 * Fri Feb 25: After coding a prototype with System.Console.GetOpt I decided to switch to another
 library namely System.Console.ArgParser which seemed to have more of what we needed for this project. Finished coding Options.hs
 * Sun Feb 28: Added docs to Options.hs and testet whole application with Tage. We ran into some issues regarding portaudio not finding
-soundcard device on the server laptop. The plan now is to build an executable on windows instead.
+soundcard device on the server laptop. The plan now is to build an executable on the Windows platform instead.
+* Mon Mar 1: Started writing on the report, more specifically on the external libaries part. What libraries we used and how we used them in the context of our project. Started drawing some flowcharts that explains in a abstract way how the program works.
+* Tue Mar 2: Continued writing on the report, finished writing the function explanations for network and audio.
