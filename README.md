@@ -44,3 +44,10 @@ Advanced Quantified Communication Program
     ```
     $ stack build
     ```
+    
+## Testing
+Test cases are provided in the folder /test. To run the test use:
+
+    ```
+    $ stack test
+    ```
