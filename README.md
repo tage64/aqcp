@@ -46,7 +46,7 @@ Advanced Quantified Communication Program
     ```
     
 ## Testing
-Test cases are provided in the folder /test. To run the test use:
+Test cases are provided in the folder test. To run the these use:
 
     ```
     $ stack test
