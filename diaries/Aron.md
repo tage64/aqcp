@@ -1,9 +1,9 @@
 
 17/2 -- Did research about networking between computers in haskell.
 
-18/2 -- Did research about networking between computers in haskell.
+18/2 -- Did research about networking between computers in haskell and how to implement it into a program using an extrenal library.
 
-19/2 -- Worked on setting up stack and all haskell details and helped Alessandro with some details in networking.
+19/2 -- Worked on setting up stack and all haskell details and worked with Alessandro with some details in networking.
 
 22/2 -- Started working on the project report with structure and the look of the final report. Started with the intruduction and the base on the project and som facts about encryption in general.
 
