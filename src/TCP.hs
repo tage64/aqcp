@@ -11,15 +11,37 @@ where
 import           Control.Concurrent.Async
 import           Control.Exception
 import           Control.Monad
+import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Maybe
+import           Data.Binary                   as Binary
+import           Data.Binary.Get               as BGet
 import           Data.ByteString
 import           Data.IORef
 import           Data.IP
 import           Debug.Trace
-import           Network.Simple.TCP
+import           Network.Simple.TCP      hiding ( Socket )
+import qualified Network.Simple.TCP            as SimpleTCP
+import qualified Network.Socket.ByteString.Lazy
+                                               as SocketLazy
 
 {- Since these function requires two systems in order to work it's hard to visually
    demonstrate any command line based examples. Please see TCPTest.hs to see examples.-}
 
+{- A socket represents a connection over tcp.
+ - Represented by Socket SimpleTCP.Socket (IORef ByteString), where the ByteString represents received but unread bytes.
+ - The byte string with unused bytes is in an IORef to allow for mutable updates without having to generate a new socket.
+ -}
+data Socket = Socket SimpleTCP.Socket (IORef ByteString)
+
+{- newSocket socket
+ - Create a new Socket from a SimpleTCP.Socket.
+ - The byte string with unused bytes will be set to empty.
+ - RETURNS: A new socket.
+ -}
+newSocket :: SimpleTCP.Socket -> IO Socket
+newSocket socket = do
+  unusedBytes <- newIORef empty
+  return $ Socket socket unusedBytes
 
 {- withClient hostname servicename
    Initializes a client end of a TCP connection, where hostname is the server domain name
@@ -30,7 +52,13 @@ import           Network.Simple.TCP
                  raise an exception.
 -}
 withClient :: HostName -> ServiceName -> ((Socket, SockAddr) -> IO a) -> IO a
-withClient = connect
+withClient hostName serviceName computation = connect
+  hostName
+  serviceName
+  (\(sock, sockAddr) -> do
+    socket <- newSocket sock
+    computation (socket, sockAddr)
+  )
 
 {- withServer hostPreference servicename terminate computation
    Initializes a server end of a TCP connection, where hostPreference is the host to bind and
@@ -62,11 +90,12 @@ withServer hostPreference serviceName terminate computation = listen
     let -- A new thread where we listen for incoming connections.
         createListenThread = async $ forever $ accept
           socket
-          (\conn@(_, sockAddr) -> do
+          (\(sock, sockAddr) -> do
+            socket <- newSocket sock
             let -- A new thread for this connection.
                 -- Here we'll run the provided computation and catch and print any exception.
                 createThread = async
-                  (       computation conn
+                  (       computation (socket, sockAddr)
                   `catch` (\e ->
                             traceIO
                               $  "Error at connection "
@@ -103,11 +132,28 @@ withServer hostPreference serviceName terminate computation = listen
   Send bytestring over a TCP connection where socket must be bounded to a server or client.
 -}
 sendBytes :: Socket -> ByteString -> IO ()
-sendBytes socket someByteString = send socket someByteString
+sendBytes (Socket sock _) someByteString =
+  let encoded = Binary.encode someByteString in SocketLazy.sendAll sock encoded
 
 {-receiveBytes socket bytestring
   Receive bytestring over a TCP connection where socket must be bounded to a server or client.
   RETURNS: Nothing or Just bytestring
 -}
 receiveBytes :: Socket -> IO (Maybe ByteString)
-receiveBytes socket = recv socket 4096
+receiveBytes (Socket sock unusedBytesRef) = do
+  unusedBytes <- readIORef unusedBytesRef
+  let newDecoder = BGet.runGetIncremental Binary.get
+  decodeLoop $ BGet.pushChunk newDecoder unusedBytes
+ where
+  decodeLoop :: BGet.Decoder ByteString -> IO (Maybe ByteString)
+  decodeLoop decoder = case decoder of
+    Fail _ _ err -> error $ "Failed to decode byte string in tcp:" ++ err
+    Done unusedBytes _ result -> do
+      writeIORef unusedBytesRef unusedBytes
+      return $ Just result
+    Partial _ -> runMaybeT $ do
+      -- Not enough bytes were availlable so we'll fetch more from the socket.
+      received <- MaybeT $ recv sock 512
+      liftIO $ writeIORef unusedBytesRef empty
+      let newDecoder = BGet.pushChunk decoder received
+      MaybeT $ decodeLoop newDecoder
