@@ -11,4 +11,6 @@
 
 25/2 -- Wrote some more on the project report in regards of how other communication services use or dont use encoding to protect their users and read up on the facts regarding             different types of encryption and how well they seem to have worked.
 
-26/2 -- 
+26/2 -- Continued to structure the report and added information regarding the intruduction and abstract
+
+1/3 -- Wrote some information in the "External libraries" part of the report and added som references that I'm not quite sure if we shall use and continued on wrapping up the            entirity of the report 
