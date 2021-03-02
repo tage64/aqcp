@@ -130,6 +130,8 @@ withServer hostPreference serviceName terminate computation = listen
 
 {-sendBytes socket bytestring
   Send bytestring over a TCP connection where socket must be bounded to a server or client.
+  The byte string will be tagged with its length so that the recipient will get this exact byte string.
+  RETURNS: An IO computation over ().
 -}
 sendBytes :: Socket -> ByteString -> IO ()
 sendBytes (Socket sock _) someByteString =
@@ -141,10 +143,24 @@ sendBytes (Socket sock _) someByteString =
 -}
 receiveBytes :: Socket -> IO (Maybe ByteString)
 receiveBytes (Socket sock unusedBytesRef) = do
+  -- Get the unused bytes from the previous call to receiveBytes.
+  -- If the last call for example forced us to fetch 512 bytes from the socket.
+  -- But we only consumed 12 bytes of those 512 because the length tag told us to do so,
+  -- then unusedBytes will contain those 500 remaining bytes.
   unusedBytes <- readIORef unusedBytesRef
+  -- Create a ByteString decoder from the Data.Binary module.
   let newDecoder = BGet.runGetIncremental Binary.get
+  -- Run the decode loop with the unused bytes put into the decoder.
   decodeLoop $ BGet.pushChunk newDecoder unusedBytes
  where
+  {- decodeLoop decoder
+   - Check the state of the decoder and take a propper action based on that.
+   - If the decoder has failed, then throw an error.
+   - If the decoder is done, update unusedBytes with the remaining unused bytes and return Just result.
+   - If the decoder needs more bytes, fetch more bytes from the socket, push them into the decoder and run decodeLoop with the new decoder again.
+   - RETURNS: Just byteString if everything worked well or Nothing if the other end disconnected.
+   - SIDE_EFFECTS: Will update unusedBytesRef.
+   -}
   decodeLoop :: BGet.Decoder ByteString -> IO (Maybe ByteString)
   decodeLoop decoder = case decoder of
     Fail _ _ err -> error $ "Failed to decode byte string in tcp:" ++ err
@@ -154,6 +170,9 @@ receiveBytes (Socket sock unusedBytesRef) = do
     Partial _ -> runMaybeT $ do
       -- Not enough bytes were availlable so we'll fetch more from the socket.
       received <- MaybeT $ recv sock 512
+      -- Set unused bytes to empty since we've consumed all of them.
       liftIO $ writeIORef unusedBytesRef empty
+      -- Push the received bytes into the decoder.
       let newDecoder = BGet.pushChunk decoder received
+      -- Run decodeLoop with the new decoder.
       MaybeT $ decodeLoop newDecoder
