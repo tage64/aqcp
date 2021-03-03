@@ -11,3 +11,4 @@ library namely System.Console.ArgParser which seemed to have more of what we nee
 soundcard device on the server laptop. The plan now is to build an executable on the Windows platform instead.
 * Mon Mar 1: Started writing on the report, more specifically on the external libaries part. What libraries we used and how we used them in the context of our project. Started drawing some flowcharts that explains in a abstract way how the program works.
 * Tue Mar 2: Continued writing on the report, finished writing the function explanations for network and audio.
+* Wed Mar 3: Modified Options, added two new optional flag arguments to the constructors Server and Client namely input and output device aswell as extended makeParser. Also added new constructor ListAllDevices to Options. Continued writing on the report, polished the explanation part for AudioIO and added some new text to the discussion part. Lastly I wrote the example usage part of the report.
