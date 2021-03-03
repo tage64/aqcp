@@ -109,6 +109,7 @@ withServer hostPreference serviceName terminate computation = listen
                   connectionThreads
                   (\threads -> (newThread : threads, ()))
             -- We'll use a bracket to make sure the created thread is canceled if an exception is thrown somewhere.
+            -- cancel will be called if an exception is raised after the thread is created but during the thread list is updated.
             bracketOnError createThread cancel updateThreadList
           )
         -- Wait for the provided terminate computation to complete or the listen thread to throw an exception.
@@ -144,9 +145,9 @@ sendBytes (Socket sock _) someByteString =
 receiveBytes :: Socket -> IO (Maybe ByteString)
 receiveBytes (Socket sock unusedBytesRef) = do
   -- Get the unused bytes from the previous call to receiveBytes.
+  -- Or to put it another way, the received but unconsumed bytes.
   -- If the last call for example forced us to fetch 512 bytes from the socket.
-  -- But we only consumed 12 bytes of those 512 because the length tag told us to do so,
-  -- then unusedBytes will contain those 500 remaining bytes.
+  -- But we only consumed 12 bytes of those 512 then unusedBytes will contain those 500 remaining bytes.
   unusedBytes <- readIORef unusedBytesRef
   -- Create a ByteString decoder from the Data.Binary module.
   let newDecoder = BGet.runGetIncremental Binary.get
