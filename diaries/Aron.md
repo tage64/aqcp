@@ -14,3 +14,7 @@
 26/2 -- Continued to structure the report and added information and finshed up the entire intruduction and abstract.
 
 1/3 -- Wrote information in the "External libraries" Network.Simple.TCP part of the report and added som references and continued on wrapping up the entirity of the report and layout.
+
+2/3 -- Meeting with the group regarding the way the final project report should look.
+
+3/3 -- Finished up the appendix, references, extrnal libraries, shortcommings and improvments, discussion and abstract.
