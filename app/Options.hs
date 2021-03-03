@@ -129,6 +129,6 @@ getOptions = do
         putStrLn err
         putStrLn ""
         putStrLn "aqcp -h    for help"
-        exitFailure
+        exitSuccess
       )
     Right options -> return options
