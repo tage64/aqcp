@@ -32,19 +32,21 @@ Advanced Quantified Communication Program
     $ stack exec -- pacman -S mingw-w64-x86_64-portaudio
     $ stack exec -- pacman -S mingw-w64-x86_64-libsodium
     # And now we should just be able to run:
-    $ stack build
+    $ stack -- no-nix build
     ```
 
-### Mac OS X (No longer supported)
+### Mac OS X
 
 * Install [stack](https://docs.haskellstack.org/en/stable/README/)
-* Install the portaudio package with [homebrew](https://brew.sh/)
-* libsodium also must be installed and found by the ghc compiler. We've not managed to solve that yet. Open for solutions.
-* And run:
+* Nix package manager must be installed in order for the compiler to find and link the header files in the
+libsodium package. To install Nix run and follow the on screen instructions:
+    ```
+    $ sh <(curl -L https://nixos.org/nix/install) --darwin-use-unencrypted-nix-store-volume
+    ```
+* To build run:
     ```
     $ stack build
     ```
-    
 ## Testing
 Test cases are provided in the folder test. To run the these use:
 
