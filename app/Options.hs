@@ -126,7 +126,7 @@ getOptions = do
   case parseArgs args parser of
     Left err ->
       (do
-        putStrLn $ "Command line error: " ++ err
+        putStrLn err
         putStrLn ""
         putStrLn "aqcp -h    for help"
         exitFailure
