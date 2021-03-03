@@ -18,3 +18,12 @@ Also wrote testing for AudioCompression.hs
 25/2 - 2021
 Meeting. Time to add everything together and test it.
 Looked into command line parsing.
+
+1/3 - 2021
+Meeting with supervisor. Started writing on the report. Wrote about compression in sectioin 1 and 2 and some of the external libraries.
+
+2/3 -2021
+Writing. Restructured some parts of the report and started writing discussion. Added how to runt test cases to README.md.
+
+3/3 -2021
+Wrote some of the example usage and discussion parts, particulary the shortcomings of compression. Some more restructuring and changes to introduction
