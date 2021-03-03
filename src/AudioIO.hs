@@ -60,7 +60,7 @@ data DeviceInfo = DeviceInfo {
                     maxOutputChannels :: Int,
                     defaultSampleRate :: CDouble,
                     portAudioIndex :: Int
-                  } deriving (Show)
+                  } deriving (Eq, Show)
 
 {- mkDeviceInfo deviceIndex portAudioDeviceInfo
  - Construct a DeviceInfo from an portaudio index and portaudio device info.

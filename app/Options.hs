@@ -1,10 +1,14 @@
-module Options (Options(..), getOptions) where
+module Options
+  ( Options(..)
+  , getOptions
+  )
+where
 
 import           System.Console.ArgParser
-import           System.Environment (getArgs)
+import           System.Environment             ( getArgs )
 import           System.Exit
 import           Control.Applicative
-import           Crypto (Code)
+import           Crypto                         ( Code )
 
 
 {- Options that must be set to initialize the program.
@@ -31,7 +35,7 @@ import           Crypto (Code)
  -}
 data Options = Server String String Code (Maybe Int) (Maybe Int)
              | Client String String Code (Maybe Int) (Maybe Int)
-             | ListAudioDevices
+             | ListAudioDevices Bool
              | CentralServer String String
              deriving (Show)
 
@@ -49,24 +53,63 @@ data Options = Server String String Code (Maybe Int) (Maybe Int)
 -}
 makeParser :: IO (CmdLnInterface Options)
 makeParser = do
-   subcommands <- mkSubParser
-      [ ("server", mkDefaultApp ((\s1 s2 s3 s4 s5 -> Server s1 s2 (read s3) (if s4 == "" then Nothing else Just (read s4)) (if s5 == "" then Nothing else Just (read s5))) 
-      `parsedBy` reqPos "address" `Descr` "local IP address" 
-      `andBy` reqPos "port" `Descr` "server port or service name" 
-      `andBy` reqPos "code" `Descr` "code to verify with client"
-      `andBy` optFlag "" "input-device" `Descr` "an input audio device"
-      `andBy` optFlag "" "output-device" `Descr` "an output audio device") "server")
-      , ("client", mkDefaultApp ((\s1 s2 s3 s4 s5 -> Client s1 s2 (read s3)  (if s4 == "" then Nothing else Just (read s4)) (if s5 == "" then Nothing else Just (read s5)))
-      `parsedBy` reqPos "address" `Descr` "public IP address of the server " 
-      `andBy` reqPos "port" `Descr` "server port or service name" 
-      `andBy` reqPos "code" `Descr` "code to verify with server"
-      `andBy` optFlag "" "input-device" `Descr` "an input device"
-      `andBy` optFlag "" "output-device" `Descr` "an output device") "client") 
-      , ("centralserver", mkDefaultApp 
-      (CentralServer 
-      `parsedBy` reqPos "address" 
-      `andBy` reqPos "port") "centralserver")]
-   return $ setAppDescr subcommands "Advanced Quantified Communication Program"
+  subcommands <- mkSubParser
+    [ ( "server"
+      , mkDefaultApp
+        (          (\s1 s2 s3 s4 s5 -> Server
+                     s1
+                     s2
+                     (read s3)
+                     (if s4 == "" then Nothing else Just (read s4))
+                     (if s5 == "" then Nothing else Just (read s5))
+                   )
+        `parsedBy` reqPos "address"
+        `Descr`    "local IP address"
+        `andBy`    reqPos "port"
+        `Descr`    "server port or service name"
+        `andBy`    reqPos "code"
+        `Descr`    "code to verify with client"
+        `andBy`    optFlag "" "input-device"
+        `Descr`    "an input audio device"
+        `andBy`    optFlag "" "output-device"
+        `Descr`    "an output audio device"
+        )
+        "server"
+      )
+    , ( "client"
+      , mkDefaultApp
+        (          (\s1 s2 s3 s4 s5 -> Client
+                     s1
+                     s2
+                     (read s3)
+                     (if s4 == "" then Nothing else Just (read s4))
+                     (if s5 == "" then Nothing else Just (read s5))
+                   )
+        `parsedBy` reqPos "address"
+        `Descr`    "public IP address of the server "
+        `andBy`    reqPos "port"
+        `Descr`    "server port or service name"
+        `andBy`    reqPos "code"
+        `Descr`    "code to verify with server"
+        `andBy`    optFlag "" "input-device"
+        `Descr`    "an input device"
+        `andBy`    optFlag "" "output-device"
+        `Descr`    "an output device"
+        )
+        "client"
+      )
+    , ( "centralserver"
+      , mkDefaultApp
+        (CentralServer `parsedBy` reqPos "address" `andBy` reqPos "port")
+        "centralserver"
+      )
+    , ( "lsdevices"
+      , mkDefaultApp
+        (ListAudioDevices `parsedBy` boolFlag "v" `Descr` "be verbose")
+        "lsdevices"
+      )
+    ]
+  return $ setAppDescr subcommands "Advanced Quantified Communication Program"
 
 {- getOptions
    Reads the argument passed to the command line and parses it.
@@ -76,10 +119,12 @@ makeParser = do
  -}
 getOptions :: IO Options
 getOptions = do
-   args <- getArgs
-   parser <- makeParser
-   case parseArgs args parser of 
-      Left error -> (do
-         putStrLn error
-         exitFailure)
-      Right options -> return options
+  args   <- getArgs
+  parser <- makeParser
+  case parseArgs args parser of
+    Left error ->
+      (do
+        putStrLn error
+        exitFailure
+      )
+    Right options -> return options
