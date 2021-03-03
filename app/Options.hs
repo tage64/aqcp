@@ -5,6 +5,7 @@ module Options
 where
 
 import           System.Console.ArgParser
+import           System.Console.ArgParser.Format
 import           System.Environment             ( getArgs )
 import           System.Exit
 import           Control.Applicative
@@ -31,7 +32,8 @@ import           Crypto                         ( Code )
  -      String  -- The local ip address.
  -      String  -- The port or service name.
  - or:
- -  ListAudioDevices: -- List all audio devices on the system
+ -  ListAudioDevices: verbose -- List all audio devices on the system
+ -                            -- Be more verbose if verbose is True.
  -}
 data Options = Server String String Code (Maybe Int) (Maybe Int)
              | Client String String Code (Maybe Int) (Maybe Int)
@@ -122,9 +124,11 @@ getOptions = do
   args   <- getArgs
   parser <- makeParser
   case parseArgs args parser of
-    Left error ->
+    Left err ->
       (do
-        putStrLn error
+        putStrLn $ "Command line error: " ++ err
+        putStrLn ""
+        putStrLn "aqcp -h    for help"
         exitFailure
       )
     Right options -> return options
