@@ -6,7 +6,7 @@ module AudioIO
   , Error
   , InputOverflowed
   , OutputUnderflowed
-  , DeviceInfo
+  , DeviceInfo(..)
   , devices
   , defaultInputDevice
   , defaultOutputDevice
@@ -55,7 +55,7 @@ data OutputUnderflowed = OutputUnderflowed deriving (Show)
  - INVARIANT: The properties must be similar to that of the portaudio device with the same index.
  -}
 data DeviceInfo = DeviceInfo {
-                    name :: String,
+                    deviceName :: String,
                     maxInputChannels :: Int,
                     maxOutputChannels :: Int,
                     defaultSampleRate :: CDouble,
