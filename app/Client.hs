@@ -47,18 +47,22 @@ runClient terminate ipAddr serviceName code inputDevice outputDevice =
     -- Initialize the crypto machinery.
     crypto                       <- Crypto.initCrypto
     -- Generate a secret key and a handshake.
+    putStrLn "Generating public and private key pair."
     (secretKey, clientHandshake) <- newClientHandshake crypto code
     -- Convert the handshake to a byte string so that we can send it over tcp.
     let clientHandshakeAsBytes =
           Crypto.clientHandshakeToByteString clientHandshake
     -- Send the handshake over tcp to the server.
+    putStrLn "Sending public key to server."
     TCP.sendBytes socket clientHandshakeAsBytes
     -- Wait for a handshake from the server.
+    putStrLn "Waiting for server's public key."
     maybeReceived <- receiveBytes socket
     let serverHandshake = case maybeReceived of
           Just bytes -> Crypto.serverHandshakeFromByteString bytes
           nothing    -> error "Server disconnected while handshaking."
     -- Handshake with the server.
+    putStrLn "Handshakeing with the server."
     let (encrypter, decrypter) =
           case createClient secretKey serverHandshake clientHandshake of
             Just x -> x
@@ -68,4 +72,5 @@ runClient terminate ipAddr serviceName code inputDevice outputDevice =
 
     -- Start the audio streaming.
     -- It'll terminate when terminate completes, (as runClient will do).
+    putStrLn "Start audio streaming."
     streamAudio terminate socket encrypter decrypter inputDevice outputDevice
