@@ -1,6 +1,8 @@
 # aqcp
 Advanced Quantified Communication Program
 
+Aqcp is an encrypted voice chat. Currently only between two users. No central server is required, but one of the users must act as server.
+
 ## Building
 
 ### Unix like (Linux/MacOSX)
@@ -8,8 +10,21 @@ Advanced Quantified Communication Program
 On unix like operating systems we use the package manager [nix][2] integrated with [stack][1]. You need to install those.
 
 * Install [stack][1]
-* Install [nix][3]
-* Just run:
+* [Install nix][3]
+    * On linux:
+
+        ```
+        $ curl -L https://nixos.org/nix/install | sh
+        ```
+
+    * On some versions of Mac OS X you instead need to run:
+
+        ```
+        $ sh <(curl -L https://nixos.org/nix/install) --darwin-use-unencrypted-nix-store-volume
+        ```
+
+    * You might need to logout and login to the shell now as suggested by the install script in order for the nix environment to be properly loaded.
+* And now you should just be able to run:
 
     ```
     $ stack build
@@ -42,7 +57,7 @@ The key here on windows is that we cannot use nix so we pass --no-nix to all sta
 
 ## Testing
 
-* Test cases are provided in the folder test. To run the these use:
+* Test cases are provided in the folder test. To run these use:
 
     ```
     $ stack test
