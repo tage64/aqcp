@@ -34,6 +34,14 @@ On unix like operating systems we use the package manager [nix][2] integrated wi
     $ stack install
     ```
 
+#### **Important: If stack build or stack run failes**
+
+You can try:
+```
+$ rm -r ~/.stack/setup-exe-cache
+```
+And rerun the command.
+
 ### Windows
 
 * Install [stack][1]
