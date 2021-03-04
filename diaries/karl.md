@@ -17,7 +17,7 @@ Also wrote testing for AudioCompression.hs
 
 25/2 - 2021
 Meeting. Time to add everything together and test it.
-Looked into command line parsing.
+Looked into command line parsing and wrote a "skeleton" but it ended up not being used when we switched from GetOpt to argparser.
 
 1/3 - 2021
 Meeting with supervisor. Started writing on the report. Wrote about compression in sectioin 1 and 2 and some of the external libraries.
@@ -27,3 +27,6 @@ Writing. Restructured some parts of the report and started writing discussion. A
 
 3/3 -2021
 Wrote some of the example usage and discussion parts, particulary the shortcomings of compression. Some more restructuring and changes to introduction
+
+4/3 - 2021
+Met up at campus to finnish up the report. Made a lot of changes. Rewrote parts of introduction, exemple usage, discussion. Proof reading and some last minute changes.
