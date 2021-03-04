@@ -65,6 +65,45 @@ The key here on windows is that we cannot use nix so we pass --no-nix to all sta
     $ stack --no-nix test
     ```
 
+## Usage
+
+The program can either be installed via `stack install` or run directly with stack using `stack run --`.
+
+### Get command line interface help
+
+To get help about the command line interface run:
+```
+$ aqcp --help  ## If installed
+$ stack run -- --help  # On unix
+$ stack --no-nix -- --help  # On windows
+```
+
+### Running a server
+
+You must forward a port and fetch your local ip address (instructions [here][4]). Then you and the client must agree upon a code which will function as meeting id.
+
+```
+$ aqcp server <IP_ADDRESS> <PORT> <CODE>
+# Or
+$ stack run -- server <IP_ADDRESS> <PORT> <CODE>
+# Or on windows
+$ stack --no-nix run -- server <IP_ADDRESS> <PORT> <CODE>
+```
+
+### Running a client
+
+You must no the server's public ip address. The server can fetch it from <https://ipecho.net>. You must also know the server's port and the code (meeting id).
+
+```
+$ aqcp client <IP_ADDRESS> <PORT> <CODE>
+# Or
+$ stack run -- client <IP_ADDRESS> <PORT> <CODE>
+# Or on windows
+$ stack --no-nix run -- client <IP_ADDRESS> <PORT> <CODE>
+```
+
+
 [1]: https://docs.haskellstack.org/en/stable/README
 [2]: https://nixos.org
 [3]: https://nixos.org/download.html
+[4]: https://ipecho.net/localip.html
