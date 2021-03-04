@@ -27,3 +27,10 @@
              Then all byte strings sent will arrive with exactly the same length and content.
              It took roughly the whole day but at the end my computer crashed and all my saved work was lost.
              I needed to rewrite  everything in the evening but it actually became better code then.
+* Wed Mar 3: Tested the program and now it finally worked.
+             Worked together with Alessandro to implement command line interface and wrote main function.
+             Also learnt about how to integrate nix with stack to form reproduceble builds with external c-libraries.
+             That enabled us to compile on mac again.
+             Lastly improved the README a bit.
+* Thu Mar 4: Wrote about the most important modules in the report at the subsection modules.
+             Improved README even more.
