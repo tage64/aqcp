@@ -20,3 +20,5 @@
 3/3 -- Finished up the appendix, references, extrnal libraries, shortcommings and improvments, discussion and abstract.
 
 4/3 -- Proof read the report and sent it in
+
+8/3 -- Made the presentation video with sound recordings and powerpoint
