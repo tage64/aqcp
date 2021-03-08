@@ -18,3 +18,5 @@
 2/3 -- Meeting with the group regarding the way the final project report should look.
 
 3/3 -- Finished up the appendix, references, extrnal libraries, shortcommings and improvments, discussion and abstract.
+
+4/3 -- Proof read the report and sent it in
