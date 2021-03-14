@@ -30,3 +30,6 @@ Wrote some of the example usage and discussion parts, particulary the shortcomin
 
 4/3 - 2021
 Met up at campus to finnish up the report. Made a lot of changes. Rewrote parts of introduction, exemple usage, discussion. Proof reading and some last minute changes.
+
+14/3 - 2021
+Made some final adjustments to to the report.
