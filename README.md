@@ -63,9 +63,13 @@ And rerun the command.
 
 The key here on windows is that we cannot use nix so we pass --no-nix to all stack commands.
 
+## Prebuilt binaries
+
+Instead of building everything yourself, you might want to download a prebuilt binary instead. Currently we only offer binaries for windows. It can be found under the releases page on github. Download the zipped directory and extract it to a known location on your filesystem. Then, open a command prompt and navigate into the extracted directory and run aqcp-exe.exe with some arguments. **Important**, make sure the dll-files remaines in the same directory as the executable or the program will complain on missing libraries.
+
 ## Testing
 
-* Test cases are provided in the folder test. To run these use:
+* Test cases are provided in the folder `test`. To run these use:
 
     ```
     $ stack test
@@ -109,6 +113,15 @@ $ stack run -- client <IP_ADDRESS> <PORT> <CODE>
 # Or on windows
 $ stack --no-nix run -- client <IP_ADDRESS> <PORT> <CODE>
 ```
+
+## Repository structure
+
+The repository is structured as follows:
+
+* The source code is found in the `src` and `app` directories.
+* Testcases can be found in the directory `test`.
+* Dependency specification and stack configuration is stored in `package.yaml` and `stack.yaml`.
+* Diaries for the contributers resides in the `diaries` folder.
 
 
 [1]: https://docs.haskellstack.org/en/stable/README
