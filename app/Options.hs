@@ -28,17 +28,12 @@ import           Crypto                         ( Code )
  -      Maybe Int -- An input audio device
  -      Maybe Int -- An output audio device
  - or:
- -  CentralServer:  -- Act as a central server accepting connections from many clients and matching clients with equal codes to each other.
- -      String  -- The local ip address.
- -      String  -- The port or service name.
- - or:
  -  ListAudioDevices: verbose -- List all audio devices on the system
  -                            -- Be more verbose if verbose is True.
  -}
 data Options = Server String String Code (Maybe Int) (Maybe Int)
              | Client String String Code (Maybe Int) (Maybe Int)
              | ListAudioDevices Bool
-             | CentralServer String String
              deriving (Show)
 
 {- makeParser
@@ -47,11 +42,6 @@ data Options = Server String String Code (Maybe Int) (Maybe Int)
    Each command tells the program what role the user want to act on. The library provides Help/Usage info that automatically built from the parser specification
    which can be called with "-h".
    RETURNS: CmdLnInterface Options in an IO computation
-   EXAMPLES: After building the executable, here are examples to run on the command line to interact with aqcp 
-            $ 
-
-
-
 -}
 makeParser :: IO (CmdLnInterface Options)
 makeParser = do
@@ -99,11 +89,6 @@ makeParser = do
         `Descr`    "an output device"
         )
         "client"
-      )
-    , ( "centralserver"
-      , mkDefaultApp
-        (CentralServer `parsedBy` reqPos "address" `andBy` reqPos "port")
-        "centralserver"
       )
     , ( "lsdevices"
       , mkDefaultApp

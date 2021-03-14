@@ -62,9 +62,6 @@ main = do
                 code
                 (findDeviceOr maybeInputDevice defaultInputDevice)
                 (findDeviceOr maybeOutputDevice defaultOutputDevice)
-    CentralServer _ _ ->
-      putStrLn
-        "The central server isn't done yet. Ask the developers to implement it."
     ListAudioDevices verbose -> forM_
       allDevices
       (\device -> do
