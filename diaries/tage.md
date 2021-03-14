@@ -34,3 +34,5 @@
              Lastly improved the README a bit.
 * Thu Mar 4: Wrote about the most important modules in the report at the subsection modules.
              Improved README even more.
+* Tue Mar 9: Make the presentation.
+* Sun Mar 14: Update the readme with instructions how to use prebuilt binaries on windows and a short description of the repository structure.
