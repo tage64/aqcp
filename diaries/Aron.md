@@ -22,3 +22,5 @@
 4/3 -- Proof read the report and sent it in
 
 8/3 -- Made the presentation video with sound recordings and powerpoint
+
+14/3 -- Made the final adjustments after the opponents feedback
